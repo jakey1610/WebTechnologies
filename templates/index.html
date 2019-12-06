@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+  </head>
+  <body>
+    <center>
+      <h1>Books</h1>
+    </center>
+    <div id = "container">
+    {% for j in range(books|length) %}
+      <div class = "book tooltip">
+        <h2>{{books['bookID'][j]}}</h2>
+        <h2>{{books['bName'][j]}}</h2>
+        <span class="tooltiptext">
+             {% for r in range(ratings|length) %}
+              {% if ratings["bookID"][r] == books["bookID"][j] %}
+                  <p>{{ratings["userID"][r]}} - {{ratings["rating"][r]}}</p>
+              {% endif %}
+             {% endfor %}
+            ...
+        </span>
+        <h3>{{books['genre'][j]}}</h3>
+        <h4>{{books['on'][j]}}</h4>
+      </div>
+    {% endfor %}
+    <br />
+  </div>
+  <center>
+    <h2>Rate a book as user {{ userID }}</h2>
+    <form action="/addRating/{{ userID }}" method="post">
+      Book ID:<br /><br />
+      <input type = "number" name = "bookid"/> <br /><br />
+      Rating:<br /><br />
+      <input type = "number" name = "rating" max = "5", min = "0"/> <br /><br />
+      <input type = "submit" value = "Submit"/>
+    </form>
+      <!-- Recommendations on/off:
+      <input type = "checkbox" name = "reco" checked action = "/recommend" > -->
+  </center>
+  </body>
+</html>
