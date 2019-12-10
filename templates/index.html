@@ -4,8 +4,38 @@
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
   </head>
   <body>
+    <script type = "text/javascript">
+      window.editRating = function(dom) {
+        var bookID = document.getElementById(dom).getElementsByClassName("bookID")[0].textContent;
+        var rating = document.getElementById(dom).getElementsByClassName("rating")[0].textContent;
+        document.getElementById("bookID").value = bookID;
+        document.getElementById("rating").value = rating;
+        document.getElementById("rating").focus();
+      }
+    </script>
+    <div class="topnav">
+     <a class = "title">Books</a>
+     {% if loggedIn %}
+     <div class="login-container">
+       <form action="/logout" method="POST">
+         <button type="submit">Logout</button>
+       </form>
+     </div>
+     {% else %}
+       <div class="login-container">
+         <form action="/login" method="POST">
+           <input type="text" placeholder="User ID" name="username">
+           <button type="submit">Login</button>
+         </form>
+       </div>
+     {% endif %}
+    </div>
     <center>
-      <h1>Books</h1>
+      {% if loggedIn %}
+       <h2>Here are some books you might like...</h2>
+      {% else %}
+       <h2>Here is our collection of books</h2>
+      {% endif %}
     </center>
     <div id = "container">
     {% for j in range(books|length) %}
@@ -21,22 +51,64 @@
             ...
         </span>
         <h3>{{books['genre'][j]}}</h3>
-        <h4>{{books['on'][j]}}</h4>
+        {% if loggedIn %}
+          <h4>{{books['on'][j]}}</h4>
+        {% endif %}
       </div>
     {% endfor %}
     <br />
   </div>
-  <center>
-    <h2>Rate a book as user {{ userID }}</h2>
-    <form action="/addRating/{{ userID }}" method="post">
-      Book ID:<br /><br />
-      <input type = "number" name = "bookid"/> <br /><br />
-      Rating:<br /><br />
-      <input type = "number" name = "rating" max = "5", min = "0"/> <br /><br />
-      <input type = "submit" value = "Submit"/>
-    </form>
-      <!-- Recommendations on/off:
-      <input type = "checkbox" name = "reco" checked action = "/recommend" > -->
-  </center>
+  {% if loggedIn %}
+    <center>
+      <h2>Here are all of your previous ratings...</h2>
+    </center>
+    <div id = "container">
+    {% for r in range(ratings|length) %}
+      {% if ratings["userID"][r] == userID %}
+        <div class = "book" id = "{{ r }}">
+          <h2 class = "bookID">{{ratings["bookID"][r]}}</h2>
+          {% for b in range(allBooks|length) %}
+            {% if allBooks["bookID"][b] == ratings["bookID"][r] %}
+              <h2>{{allBooks["bName"][b]}}</h2>
+            {% endif %}
+          {% endfor %}
+          <h4>Rating: <a class = "rating">{{ratings["rating"][r]}}</a></h4>
+          <form action = "#rating" onsubmit = "return editRating({{ r }});">
+            <button type = "submit">Edit</button>
+          </form>
+          <form action = "/deleteRating/{{ ratings['bookID'][r] }}" method = "POST">
+            <button type = "submit">Delete</button>
+          </form>
+        </div>
+      {% endif %}
+    {% endfor %}
+    <br />
+  </div>
+    <center>
+      <h2>Rate a book as user {{ userID }} or edit a previous rating</h2>
+      <!--Flask not getting any information back from select fields.-->
+      <form id="ratingForm" action="/addRating/{{ userID }}" method="POST">
+        Book Name:<br /><br />
+        <!-- <input type = "number" name = "bookid"/> <br /><br /> -->
+        <select name = "bookID" form = "ratingForm" id = "bookID">
+        {% for j in range(allBooks|length) %}
+          <option value="{{allBooks['bookID'][j]}}">{{allBooks["bName"][j]}}</option>
+        {% endfor %}
+      </select><br /><br />
+        Rating:<br /><br />
+        <!-- <input type = "number" name = "rating" max = "5", min = "0"/> <br /><br /> -->
+        <select name = "rating" form = "ratingForm" id = "rating">
+         <option value="1">1</option>
+         <option value="2">2</option>
+         <option value="3">3</option>
+         <option value="4">4</option>
+         <option value="5">5</option>
+       </select> <br /><br />
+        <input type = "submit" value = "Submit"/>
+      </form>
+        <!-- Recommendations on/off:
+        <input type = "checkbox" name = "reco" checked action = "/recommend" > -->
+    </center>
+   {% endif %}
   </body>
 </html>

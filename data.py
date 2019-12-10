@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import json
 import math
+import random
 
 def getBooks():
     return pd.read_json('books.json')
@@ -21,8 +22,29 @@ def getUP():
 def writeRating(userID,bookID,rating):
     newRating = json.loads('{"userID":' + str(userID) +', "bookID":' + str(bookID) + ', "rating":' + str(rating) + '}')
     ratings = getRatings()
+    books = getBooks()
+    ratingsData = pd.merge(ratings, books, on='bookID')
+    personBookRatings = ratingsData.pivot_table(index='userID', columns='bookID', values='rating')
+    personBookRatings = personBookRatings.fillna(0)
     nR = pd.DataFrame(newRating, index=[len(ratings)])
-    ratings = ratings.append(nR)
+    try:
+        if personBookRatings[int(bookID)][int(userID)] == 0:
+            ratings = ratings.append(nR)
+        else:
+            for rating in range(len(ratings["userID"])):
+                if ratings["userID"][rating] == np.sum(nR["userID"].astype("int16")) and ratings["bookID"][rating] == np.sum(nR["bookID"].astype("int16")):
+                    ratings["rating"][rating] = np.sum(nR["rating"].astype("int16"))
+                    break
+    except:
+        ratings = ratings.append(nR)
+    ratings.to_json('ratings.json',orient="records")
+    return False
+def deleteRating(userID,bookID):
+    ratings = getRatings()
+    for rating in range(len(ratings["userID"])):
+        if ratings["userID"][rating] == userID and ratings["bookID"][rating] == bookID:
+            ratings = ratings.drop(ratings.index[[rating]])
+            break
     ratings.to_json('ratings.json',orient="records")
 def getNumBooks():
     books = getBooks()
@@ -96,7 +118,6 @@ def pred(a,p):
         pred = meanA["rating"] + (top/bottom)
     return pred
 
-#This needs to be fixed
 #i is the userID and j is the bookID
 def SVDRecBook(M,i,j):
     people = list(M.keys())
@@ -156,7 +177,8 @@ def recBook(person):
     ratingsRev = ratings.swapaxes("index", "columns")
     ratingsTab = getRatings().pivot_table(index='bookID', columns='userID', values='rating')
     ratingsTab = ratingsTab.fillna(0)
-
+    revRatingsTab = getRatings().pivot_table(index='userID', columns='bookID', values='rating')
+    revRatingsTab = revRatingsTab.fillna(0)
     #threshold above which would recommend a book
     recs = []
     threshold = 2
@@ -206,6 +228,63 @@ def recBook(person):
         rO = [booksRev[r-1] for r in onDict.keys()]
         rT = onDict.values()
         recs = list(zip(rO,rT))
+
+    #Removing books that the user has already seen/has rated
+    read = ratings.filter(['bookID','userID'], axis=1)
+    reading = []
+    for r,p in read.itertuples(index=False):
+        reading.append((r,p))
+    i = 0
+    j = len(recs)
+    while i < j:
+        if (recs[i][0]["bookID"],person) in reading:
+            recs.pop(i)
+            j-=1
+        i+=1
+
+    #Implement solution to cold start problem with bandit problem
+    #This also somewhat deals with the problem of popularity bias
+    #Use greedy solution to the problem; select a recommendation with probability eps
+    #And select a random book with probability 1-eps
+    #Epsilon controls whether to focus more on exploration or exploitation
+    eps = 0.9
+    for rec in range(len(recs)):
+        ra = random.random()
+        if ra < eps:
+            pass
+        else:
+            #Remove the book from recommendations and find one that is less likely to be selected
+            while True:
+                booksRated = list(ratingsPerson.keys())
+                allBooks = books["bookID"].values
+                remainBooks = np.setdiff1d(allBooks,np.array(booksRated))
+                ratingsValues = ratingsPerson.values[0]
+                deleted = 0
+                for rat in range(len(ratingsValues)):
+                    if ratingsValues[rat] > 0:
+                        booksRated.pop(rat-deleted)
+                        deleted += 1
+                booksRated = np.array(booksRated)
+                #contains any of the books which we can choose at random
+                booksRated = np.append(np.array(booksRated),remainBooks)
+                idx = random.randint(0,len(booksRated)-1)
+                bandit = booksRev[booksRated[idx]-1]
+                equal = False
+                for r in recs:
+                    if r[0]["bookID"] == bandit["bookID"]:
+                        equal = True
+                if equal:
+                    pass
+                else:
+                    recs.pop(rec)
+                    recs.insert(rec,(bandit,"maybe give it a try..."))
+                    break
+    if len(recs)==0:
+        for rec in range(3):
+            booksRated = books["bookID"].values
+            idx = random.randint(0,len(booksRated)-1)
+            bandit = booksRev[booksRated[idx]-1]
+            recs.insert(rec,(bandit,"maybe give it a try..."))
     return recs
 
 def sortProfile(user):
