@@ -1,0 +1,47 @@
+[
+  {
+    "userID":1,
+    "bookID":1,
+    "rating":4
+  },
+  {
+    "userID":2,
+    "bookID":2,
+    "rating":3
+  },
+  {
+    "userID":3,
+    "bookID":3,
+    "rating":5
+  },
+  {
+    "userID":2,
+    "bookID":1,
+    "rating":2
+  },
+  {
+    "userID":5,
+    "bookID":10,
+    "rating":1
+  },
+  {
+    "userID":5,
+    "bookID":2,
+    "rating":5
+  },
+  {
+    "userID": 11,
+    "bookID":2,
+    "rating":2
+  },
+  {
+    "userID":11,
+    "bookID":3,
+    "rating":5
+  },
+  {
+    "userID": 11,
+    "bookID": 5,
+    "rating":1
+  }
+]

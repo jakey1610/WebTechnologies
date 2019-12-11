@@ -1,0 +1,62 @@
+msgid "Hello"
+msgstr "Hola"
+
+msgid "Books"
+msgstr "Libros"
+
+msgid "Book"
+msgstr "Libro"
+
+msgid "genre"
+msgstr "género"
+
+msgid "Here is our collection of books"
+msgstr "Aquí está nuestra colección de libros."
+
+msgid "User ID"
+msgstr "ID de usuario"
+
+msgid "Login"
+msgstr "Iniciar sesión"
+
+msgid "Logout"
+msgstr "Cerrar sesión"
+
+msgid "Here are some books you might like..."
+msgstr "Aquí hay algunos libros que te pueden gustar..."
+
+msgid "Here are all of your previous ratings..."
+msgstr "Aquí están todas sus calificaciones anteriores..."
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Delete"
+msgstr "Borrar"
+
+msgid "Rating"
+msgstr "Clasificación"
+
+msgid "Book Name"
+msgstr "Nombre del libro"
+
+msgid "Submit"
+msgstr "Enviar"
+
+msgid "on similar users..."
+msgstr "en usuarios similares..."
+
+msgid "on similar genres..."
+msgstr "en géneros similares..."
+
+msgid "on similar users and similar genres..."
+msgstr "en usuarios similares y géneros similares..."
+
+msgid "maybe give it a try..."
+msgstr "tal vez intentarlo..."
+
+msgid "Rate a book as user"
+msgstr "Califica un libro como usuario"
+
+msgid "or edit a previous rating"
+msgstr "o editar una calificación previa"
